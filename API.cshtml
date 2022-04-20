@@ -1,0 +1,280 @@
+﻿@page
+@{
+    ViewData["Title"] = "Example";
+}
+<div>
+    <button onclick="loadData()">Click Me</button>
+</div>
+
+<div id="dataDetailDiv">
+    <hr />
+    <form id="dataDetail" name="dataDetail">
+
+        <label for="participant_studentid">Student ID:</label><br>
+        <input type="number" id="studentid" name="studentid"><br>
+
+        <label for="participant_eventid">Event ID:</label><br>
+        <input type="number" id="eventid" name="eventid"><br>
+
+        <label for="FINISHTIME">Finish Time:</label><br>
+        <input type="datetime-local" id="finishtime" name="finishtime"><br>
+
+
+        <label for="participant_place">Place:</label><br>
+        <input type="number" id="place" name="place"><br>
+
+    </form>
+
+    <button onclick="collectData()">Send</button>
+    <hr />
+
+</div>
+
+<p>The request</p>
+<div id="requestDiv"></div>
+
+<p>The data received</p>
+<div id="RecieveDiv"></div>
+
+<div id="buildTableDiv"><div id="tablecontainer" class="container"><div id="headerRow" class="row bg-dark text-white"><div id="divStudentID" class="col">Student ID</div><div id="divEventID" class="col">Event ID</div><div id="divFinishTime" class="col">Finish Time</div><div id="divPlace" class="col">Place</div><div id="divDelete" class="col">Delete</div></div></div></div>
+
+
+
+
+<script>var lastRowNum = 0;
+
+    function loadData() {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function () {
+            document.getElementById("RecieveDiv").innerHTML = this.responseText;
+            console.log(this.responseText)
+            buildTable(this.responseText);
+        }
+        xhttp.open("GET", "api/API/LoadData", true);
+        document.getElementById("requestDiv").innerHTML = "api/API/LoadData"
+        xhttp.send();
+    }
+
+
+    function collectData() {
+        var studentid = document.getElementById("studentid").value
+        var eventid = document.getElementById("eventid").value
+        var finishtime = document.getElementById("finishtime").value
+        var place = document.getElementById("place").value
+        sendData(studentid, eventid, finishtime, place)
+    }
+
+
+    function sendData(studentid, eventid, finishtime, place) {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function () {
+            document.getElementById("RecieveDiv").innerHTML = this.responseText;
+            console.log(this.responseText)
+            appendBuildTable(this.responseText);
+        }
+        var url = "api/API/ReceiveData/0/" + studentid + "/" + eventid + "/" + finishtime + "/" + place
+        xhttp.open("GET", url, true);
+        document.getElementById("requestDiv").innerHTML = url; 
+        xhttp.send();
+    }
+
+
+    function deleteRow(rowNum) {
+
+        var dataRow = "dataRow_" + rowNum;
+        console.log(dataRow);
+        var myRow = document.getElementById(dataRow);
+        myRow.setAttribute("class", "row row-requestDelete");
+
+        var dataRowButton = "button_" + rowNum;
+        var myButton = document.getElementById(dataRowButton);
+        myButton.remove();
+
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function () {
+
+            document.getElementById("RecieveDiv").innerHTML = this.responseText;
+            console.log(this.responseText);
+            removeRow(this.responseText)
+        }
+        xhttp.open("DELETE", "api/API/" + rowNum, true);
+        document.getElementById("requestDiv").innerHTML = "api/API/" + rowNum;
+        xhttp.send();
+    }
+
+
+
+    function removeRow(num) {
+        var dataRow = "dataRow_" + num;
+        console.log(dataRow);
+        var myRow = document.getElementById(dataRow);
+        myRow.remove();
+    }
+
+
+
+    function buildTable(txtIn) {
+        var jsonObj = JSON.parse(txtIn);
+        console.log(jsonObj);
+        var buildTableDiv = document.getElementById("buildTableDiv")
+        buildTableDiv.innerHTML = null;
+        var newContainer = document.createElement("Div");
+        newContainer.setAttribute("id", "tablecontainer");
+        newContainer.setAttribute("class", "container");
+
+        var newRow = document.createElement("Div");
+        newRow.setAttribute("id", "headerRow");
+        newRow.setAttribute("class", "row bg-dark text-white");
+
+        newContainer.appendChild(newRow);
+
+        var newDivStudentID = document.createElement("Div");
+        newDivStudentID.setAttribute("id", "divStudentID");
+        newDivStudentID.setAttribute("class", "col");
+        newDivStudentID.innerHTML = "Student ID";
+        newRow.appendChild(newDivStudentID);
+
+        var newDivEventID = document.createElement("Div");
+        newDivEventID.setAttribute("id", "divEventID");
+        newDivEventID.setAttribute("class", "col");
+        newDivEventID.innerHTML = "Event ID";
+        newRow.appendChild(newDivEventID);
+
+        var newDivFinishTime = document.createElement("Div");
+        newDivFinishTime.setAttribute("id", "divFinishTime");
+        newDivFinishTime.setAttribute("class", "col");
+        newDivFinishTime.innerHTML = "Finish Time";
+        newRow.appendChild(newDivFinishTime);
+
+        var newDivPlace = document.createElement("Div");
+        newDivPlace.setAttribute("id", "divPlace");
+        newDivPlace.setAttribute("class", "col");
+        newDivPlace.innerHTML = "Place";
+        newRow.appendChild(newDivPlace);
+
+        var NewDivDelete = document.createElement("Div");
+        NewDivDelete.setAttribute("id", "divDelete");
+        NewDivDelete.setAttribute("class", "col");
+        NewDivDelete.innerHTML = "Delete";
+        newRow.appendChild(NewDivDelete);
+
+
+
+
+
+
+
+        // access JSON data
+        for (var i = 0; i < jsonObj.length; i++) {
+            var dataRow = jsonObj[i];
+            console.log(dataRow)
+            // create elements
+            var newRow = document.createElement("Div");
+            newRow.setAttribute("id", "dataRow_" + i);
+            newRow.setAttribute("class", "row row-striped");
+
+            newContainer.appendChild(newRow);
+
+
+            var newDivStudentID = document.createElement("Div");
+            newDivStudentID.setAttribute("id", "divStudentID_" + i);
+            newDivStudentID.setAttribute("class", "col");
+            newDivStudentID.innerHTML = dataRow.studentID;
+            newRow.appendChild(newDivStudentID);
+
+            var newDivEventID = document.createElement("Div");
+            newDivEventID.setAttribute("id", "divEventID_" + i);
+            newDivEventID.setAttribute("class", "col");
+            newDivEventID.innerHTML = dataRow.eventID;
+            newRow.appendChild(newDivEventID);
+
+            var newDivFinishTime = document.createElement("Div");
+            newDivFinishTime.setAttribute("id", "divFinishTime_" + i);
+            newDivFinishTime.setAttribute("class", "col");
+            newDivFinishTime.innerHTML = dataRow.finishTime;
+            newRow.appendChild(newDivFinishTime);
+
+            var newDivPlace = document.createElement("Div");
+            newDivPlace.setAttribute("id", "divPlace_" + i);
+            newDivPlace.setAttribute("class", "col");
+            newDivPlace.innerHTML = dataRow.place;
+            newRow.appendChild(newDivPlace);
+
+
+
+
+            var newDivDelete = document.createElement("Div");
+            newDivDelete.setAttribute("id", "divDelete_" + i);
+            newDivDelete.setAttribute("class", "col");
+
+            var newDivDeleteButton = document.createElement("button");
+            newDivDeleteButton.setAttribute("id", "button_" + i);
+            newDivDeleteButton.setAttribute("onclick", "deleteRow(" + i + ")");
+            newDivDeleteButton.innerHTML = "Delete";
+            newDivDelete.appendChild(newDivDeleteButton);
+
+            newRow.appendChild(newDivDelete);
+
+        }
+
+
+        buildTableDiv.appendChild(newContainer);
+
+        lastRowNum = jsonObj.length;
+
+    }
+
+    function appendBuildTable(txtIn) {
+        var tableDiv = document.getElementById("tablecontainer");
+        var jsonObj = JSON.parse(txtIn);
+        i = lastRowNum;
+        console.log(jsonObj);
+        //var buildTableDiv = document.getElementById("buildTableDiv")
+        var dataRow = jsonObj;
+        // create elements
+        var newRow = document.createElement("Div");
+        newRow.setAttribute("id", "dataRow_" + i);
+        newRow.setAttribute("class", "row row-striped");
+        tableDiv.appendChild(newRow);
+
+
+
+        var newDivStudentID = document.createElement("Div");
+        newDivStudentID.setAttribute("id", "divStudentID_" + i);
+        newDivStudentID.setAttribute("class", "col");
+        newDivStudentID.innerHTML = dataRow.studentID;
+        newRow.appendChild(newDivStudentID);
+
+        var newDivEventID = document.createElement("Div");
+        newDivEventID.setAttribute("id", "divEventID_" + i);
+        newDivEventID.setAttribute("class", "col");
+        newDivEventID.innerHTML = dataRow.eventID;
+        newRow.appendChild(newDivEventID);
+
+        var newDivFinishTime = document.createElement("Div");
+        newDivFinishTime.setAttribute("id", "divFinishTime_" + i);
+        newDivFinishTime.setAttribute("class", "col");
+        newDivFinishTime.innerHTML = dataRow.finishTime;
+        newRow.appendChild(newDivFinishTime);
+
+        var newDivPlace = document.createElement("Div");
+        newDivPlace.setAttribute("id", "divPlace_" + i);
+        newDivPlace.setAttribute("class", "col");
+        newDivPlace.innerHTML = dataRow.place;
+        newRow.appendChild(newDivPlace);
+
+
+
+        var newDivDelete = document.createElement("Div");
+        newDivDelete.setAttribute("id", "divDelete_" + i);
+        newDivDelete.setAttribute("class", "col");
+
+        var newDivDeleteButton = document.createElement("button");
+        newDivDeleteButton.setAttribute("id", "button_" + i);
+        newDivDeleteButton.setAttribute("onclick", "deleteRow(" + i + ")");
+        newDivDeleteButton.innerHTML = "Delete";
+        newDivDelete.appendChild(newDivDeleteButton);
+
+        newRow.appendChild(newDivDelete);
+    }</script>
